@@ -2,12 +2,13 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 # 1. Cargar el dataset unificado
 df = pd.read_csv('Demandarealnacionalc45f74b4-54d1-4812-9f78-e07dce7e5f6e.csv')
 
 # 2. Filtrar por una única versión de liquidación (TX2) para evitar duplicados en septiembre
-df_filtrado = df[df['Version'] == 'TX2'].copy()
+df_filtrado = df[df['Version'] == 'TXF'].copy()
 
 # 3. Convertir FechaHora a datetime
 df_filtrado['FechaHora'] = pd.to_datetime(df_filtrado['FechaHora'])
@@ -40,6 +41,34 @@ plt.title(
 plt.xlabel('Fecha', fontsize=11)
 plt.ylabel('Valor Total (kWh)', fontsize=11)
 plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()
+
+
+# 2. Crear la figura para ubicar ambos gráficos
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
+
+# 3. Graficar la FAC (ACF)
+plot_acf(
+    df_total['Valor'],
+    lags=48,
+    ax=ax1,
+    title='Función de Autocorrelación (FAC / ACF)',
+)
+ax1.set_xlabel('Rezagos / Lags (Horas)')
+ax1.set_ylabel('Autocorrelación')
+
+# 4. Graficar la FACP (PACF)
+plot_pacf(
+    df_total['Valor'],
+    lags=48,
+    ax=ax2,
+    title='Función de Autocorrelación Parcial (FACP / PACF)',
+    method='ywm',
+)
+ax2.set_xlabel('Rezagos / Lags (Horas)')
+ax2.set_ylabel('Autocorrelación Parcial')
 
 plt.tight_layout()
 plt.show()
